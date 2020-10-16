@@ -1,0 +1,368 @@
+---
+title: "Homework 3:  User Behaviors in Digital Applications"
+author: ""
+date: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = F)
+```
+
+# {.tabset}
+
+## Background
+
+For this assignment, we will be working on understanding the behaviors and characteristics of people who use a digital application.  The product offers recommendations on nearby attractions, restaurants, and businesses based on the user's location.  This includes a free version for any user along with a subscription model that provides more customized recommendations for users who pay for the service.
+
+With free installation on a mobile device, digital applications have a low barrier to entry.  They also experience high rates of attrition, as users may not continue to log in.  With this in mind, the company is interested in better understanding the early experience of users with the application.  A time point of 30 days was selected as an important milestone.  Which factors might impact whether new users remain active beyond 30 days?  Who is likely to subscribe within 30 days?  
+
+The company would benefit from analyzing the available data to understand the current trends.
+
+## Data
+
+To begin to investigate these questions, the company has gathered some simple information about new users of the application.  A simple random sample of users was taken by gathering information in the company's database.  The sample was limited only to users who first installed the application in the last 6 months, when a new version of the application was released.  The sample was further limited to users who signed up and had enough time for the company to measure its key milestones.  To ensure reasonable comparisons, the data were limited to users in Australia, Canada, United Kingdom, and the United States, which were deemed appropriately similar in terms of their linguistic and economic characteristics.
+
+For each user, basic information (age group, gender, and country) was collected from the user's profile.  Then the following characteristics were measured:
+
+* **daily_sessions**:  This is the average number of sessions per day in the first 30 days for each user.  One session consists of a period of active use as measured by the company's database.  Then the daily sessions for a user is the total number of sessions for the period divided by 30.
+
+* **subscribed_30**:  This measure (TRUE/FALSE) indicates whether the user paid for any subscription service within 30 days.
+
+* **active_30**:  This measures (TRUE/FALSE) whether the user **remained active** at 30 days.  The company decided to measure this by identifying whether the user had at least one active session in the 7-day period after the first 30 days.
+
+## Instructions
+
+Based upon the information above and the data provided, please answer the following questions.  When numeric answers are requested, a few sentences of explanation should also be provided.  Please show your code for any calculations performed.
+
+## Preliminary Code
+
+This section of the report is reserved for any work you plan to do ahead of answering the questions -- such as loading or exploring the data.
+
+```{r preliminary_code}
+## loading the packages
+library(tidyverse)
+
+## load the data
+digital_application <- read_csv("digital application user data.csv")
+
+## change the characters to factors
+digital_application <- digital_application %>% mutate_if(is.character, as.factor)
+```
+
+
+## Questions {.tabset}
+
+
+### Q1 
+
+#### Question
+
+We are interested in the question of whether female users have higher rates of daily sessions than other users do.  What kind of parameter should we select as our metric for each group?
+
+#### Answer
+
+```{r q1}
+## no code was required here because we were only stating the parameter.
+
+```
+To estimate the whether their was a difference between the female users and others based on the daily sseions we will use the mean. This is because it descibes the daily sessions distribution well as the data is numerical (intervals and ratios). it will give the average per group.
+
+### Q2 
+
+#### Question
+
+Use the data to estimate the values of your selected parameter for female users and for other users.
+
+#### Answer
+
+```{r q2}
+## we will use the mean 
+digital_application %>% 
+  group_by(female) %>% 
+  summarise(mean_rate = mean(daily_sessions))
+
+```
+From the estimation we get that the average usage for females is 1.472535 as compared to the others who had 1.428950. 
+
+### Q3 
+
+
+#### Question
+
+Does there appear to be an observed difference between the groups?  Without performing statistical tests, would you consider this difference to be meaningful for the business?  Explain your answer.
+
+#### Answer
+
+```{r q3}
+
+```
+
+There appears to be a slight difference betwen the groups, with the female users having a slightly high mean. without performing the statistical test i won't consider this difference meaningful for the business to make a decision based on it. This is because the difference way too low to validate any results from it, it may have appeared just by chance.  
+
+### Q4 
+
+#### Question
+
+Which statistical test would be appropriate for testing the two groups for differences in their daily sessions according to your selected metric?
+
+
+#### Answer
+
+```{r q4}
+
+```
+The most appropriate statistical test for comparing the difference between two independent groups using their means is the unpaired two-samples t-test. 
+
+### Q5 
+
+#### Question
+
+How many samples are included in your selected statistical test?
+
+#### Answer
+
+```{r q5}
+## samples included
+digital_application %>% group_by(female) %>% 
+  summarise(count = n())
+```
+From the data used we have two samples, female and the other gender. we see that 2863 females were sampled and 2137 represented probably the males.
+
+### Q6
+
+#### Question
+
+How many tails are considered in your selected statistical test?
+
+#### Answer
+
+```{r q6}
+
+```
+Because we are testing whether the mean of females is higher than that of the others we will use the one tailed test. Thus the tail will be one.
+
+### Q7
+
+#### Question
+
+Perform your selected statistical test.  Report a p-value for the results.
+
+#### Answer
+
+```{r q7}
+## performing the statistical test
+t.test(daily_sessions ~ female, data = digital_application,
+       var.equal = TRUE, alternative = "greater")
+```
+ The p-value for the result is 0.96. This is measure that we will use to know if there exists a difference between the two groups.
+### Q8 
+
+#### Question
+
+How would you interpret this finding for the product's managers of the digital application?  Make sure to frame the result in terms that will be meaningful for their work.
+
+#### Answer
+
+```{r q8}
+
+```
+Recording a p-value of 0.96 which is higher than the significance level alpha = 0.05, means that the females average rating is not higher than that of the others. This concludes that both genders have averagely the same usage of daily usage thus both will be considered for anything. 
+
+
+### Q9 
+
+#### Question
+
+The product's managers are also interested in the age groups that tend to use the product and how they vary by country.  Create a table with the following characteristics:
+
+* Each row represents an age group.
+
+* Each column represents a country
+
+* Each listed value shows the number of users of that age group within that country.
+
+#### Answer
+
+```{r q9}
+tab1 <- with(digital_application, table(age_group, country))
+tab1
+
+```
+The table shows the distribution of age groups per country. from both countries the age group 18-34 carries the majority of the users.
+### Q10
+
+#### Question
+
+Now convert the previous table of counts by age group and country into percentages.  However, we want the percentages to be calculated separately within each country.  Show the resulting table as percentages (ranging from 0 to 100) rounded to 1 decimal place.
+
+#### Answer
+
+```{r q10}
+round(prop.table(tab1,2)*100, 1)
+
+```
+The table of percentages still shows that in each country the young people which represent the age group of 18-34  that was high.
+### Q11
+
+#### Question
+
+Without performing any statistical tests, do you think that each country has a similar distribution of users across the age groups?  Explain why or why not.
+
+#### Answer
+
+```{r q11}
+
+```
+Yes i think the distribution has a similar distribution across the age groups, this is because when i look at the distributions in the table the percentage for each country slightly differs therefore this might have happened by chance. for example for the 18-34 age group we have 37.5%,39.3% 37.9 and 36.1 for the countries, when you observe keenly the differences are not that much larger thus the distribution are similar.
+
+
+### Q12
+
+#### Question
+
+Which statistical test would help you determine if there are age-based differences across these countries?  Explain why you selected this test.
+
+#### Answer
+
+```{r q12}
+
+```
+I will use the chi-squared contigency analysis, i chose this because the ch-squared test can be used to determine if two categorical variables are inedpendent, and that is what we are testing here.
+
+
+### Q13
+
+#### Question
+
+What is the value of the test statistic for your selected test?  Calculate this answer independently without using an existing testing function.  (You may use such a function to check your answer.)  Show your code along with the result.
+
+#### Answer
+
+```{r q13}
+## i will calculate the statistic by the formula (fo-fe)^2/fe, where fo is the frequency of the observed data and fo is the frequency of expected values.
+## after calculating the values manually i got fe
+## now calculate (fo-fe)^2/fe
+chi_squared <- ((282-279.293)^2/279.293) + ((242-228.41)^2/228.41) + ((439-430.08)^2/430.08) + ((894-919.215)^2/919.215) + ((219-237.33)^2/237.33) + ((204-194.10)^2/194.10) + ((363-365.46)^2/365.46) + ((792-781.11)^2/781.11) + ((191-169.65)^2/169.65) + ((128-138.744)^2/138.744) + ((255-261.24)^2/261.24) + ((554-558.36)^2/558.36) + ((60-65.724)^2/65.724) + ((41-53.75)^2/53.75) + ((101-101.21)^2/101.21) + ((235-216.315)^2/216.315)
+chi_squared
+## after confirming with the function i found it was the same
+confirm<- chisq.test(tab1)
+confirm
+
+
+```
+I got the statistic to be 12.6398 which we'll use to test whether there were differences in the agegroups for the diffrent countries.
+
+### Q14
+
+#### Question
+
+What is the p-value for this test?   Calculate this answer independently without using an existing testing function.  (You may use such a function to check your answer.)  Show your code along with the result.
+
+#### Answer
+
+```{r q14}
+## calculating the p-value
+## degrees of freedom
+(3-1)*(4-1)
+## we have 6 degrees of freedom
+## confirming the answer
+confirm$p.value
+
+
+```
+using the chi-square table with 6 degrees of freedom we get 0.17
+
+### Q15
+
+#### Question
+
+How would you interpret this finding for the product's managers of the digital application?  Make sure to frame the result in terms that will be meaningful for their work.
+
+#### Answer
+
+```{r q15}
+
+```
+From the test conducted and getting the p-value of 0.17 which is greater than 0.05 which shows that we dont have enough evidence that there are any differences between the countries based on the age groups, thus we dont have any association between the age groups and the countries. Therefore we dont have any age-based differences between the countries thus we can believe that the age based groups were distributed equally between the countries. 
+
+
+
+### Q16
+
+#### Question
+
+Canada and the United States are geographically connected and often having overlapping media markets.  We can place them in one group and compare them to a second group with Australia and the United Kingdom.  Do these two groups have similar rates of users who remain active at 30 days?  Perform a statistical test, explain why you selected it, and interpret the results.  
+
+#### Answer
+
+```{r q16}
+## putting the countries in similar groups 
+digi_combine <- digital_application %>% 
+  mutate(us_canada = ifelse(country %in%c("USA","Canada"), "us_canada","aus_uk" ))
+digi_combine %>% head()
+
+## i will perform an unpaired samples t test
+res <- t.test(daily_sessions ~ us_canada, data = digi_combine,
+       var.equal = TRUE)
+res
+
+```
+The two groups do not have similar rates of users, this is because after using the independent samples t-test which is a test used to compare the means between two independent groups, that is in our case we have two independent groups us_canada group and aust_uk group. The statistical test registered a p-value which was less than the significance value alpha = 0.05, concluding that we reject the null hypothesis that there was a similarity between the groups and say that there exists a difference in the rate of users who remain active for the 30 days. 
+
+
+### Q17
+
+#### Question
+
+The application's managers would like to study the relationship between daily sessions and subscriptions.  Anecdotally, they think that having at least 1 session per day could be a meaningful indicator.  Using the outcome of subscriptions at 30 days, compare the rates of subscriptions for users with at least 1 daily session to those with fewer.  Perform a statistical test, explain the reasons for your selection, and interpret the results.
+
+#### Answer
+
+```{r q17}
+## we will be comparing between two groups
+digi_combine <- digi_combine %>% 
+  mutate(atleast_1 = ifelse(daily_sessions>= 1,"greater","fewer"))
+
+## basing on the kind of variables i will be using it will be good to use the chi-squared test.
+chisq.test(digi_combine$subscribed_30,digi_combine$atleast_1)
+
+```
+I chose a chi squared test of independence because i was to compare between two categorical variables,and this is the most appropriate test. i had to convert the daily sessions to a two level categorical variable with greater and fewer levels this was to be compared to the subscription outcome. The results gotten indicate a p-value of 0.01286 which is lower than the significance value alpha = 0.05, which brings us to a conclusion that the two variables are independent. This means that having at least one session per day could not be an indicator that the one would subscribe to the service. 
+
+
+
+### Q18
+
+#### Question
+
+What type of study was conducted?  Are there any concerns about the analyses based upon the method of experimentation?
+
+#### Answer
+The type of study conducted is the case study as it was limited to acertain sample and also within a short period of time. No concerns can be raised as the analyses answer the questions quite well.
+
+
+### Q19
+
+#### Question
+
+How actionable are the findings of this analysis?  Do the independent variables help us to make choices about how to improve the outcomes of activity and subscription at 30 days?
+
+#### Answer
+From the analysis that has taken place and the findings we got, the conclusion is that they cannot be actionable. The reason because the independent variables at any point could not affect the dependent variables as most were independent of each other. Thus they do not give us the insight needed to improve the outcomes of the activity and subscription as they are independent of each other. the only independent variable that could provide some importanat information on how to improve the daily sessions is the location (countries where they come from) as this one showed a difference in the test conducted.
+
+
+
+### Q20
+
+#### Question
+
+What else could you recommend to the managers of the product for improving their preferred outcomes of activity and subscriptions at 30 days?  Provide a number of strategic recommendations that are actionable, measurable, and amenable to experimentation.
+
+#### Answer
+1. Since most of people are in the age bracket of 18-34 the managers should look on a way to reach to this population in a way that will help them find the app useful for a continual use of there services. most people in this age bracket love having fun so recommending to them the places of fun and enjoyment may work a great deal.
+2. For subscription service the managers should advertise some discount or free month for a certain number of people who continue using the app and subscribe for the model.
+3. The managers should also think of providing the users with maybe questionaires to be able to understand why there is a high attrition rate and maybe develop a model that can be able to predict if a certain individual will atrit and be able to keep them.
+
+
+
